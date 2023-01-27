@@ -12,7 +12,7 @@ model = pickle.load(open('random_forest_model.pkl','rb'))
 @app.route('/')
 
 def home():
-    return render_template('index.html')
+    return render_template('Templates/index.html')
 
 @app.route('/predict', methods =['POST'])
 def predict():
