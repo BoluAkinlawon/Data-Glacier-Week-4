@@ -1,70 +1,26 @@
-<!DOCTYPE html>
-<html >
-<!--From https://codepen.io/frytyler/pen/EGdtg-->
-<head>
-  <meta charset="UTF-8">
-  <title>Mobile Phone API</title>
-  <link href='https://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
-<link href='https://fonts.googleapis.com/css?family=Arimo' rel='stylesheet' type='text/css'>
-<link href='https://fonts.googleapis.com/css?family=Hind:300' rel='stylesheet' type='text/css'>
-<link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
-  
-  
-  
- <style>
- button,
-input,
-select,
-textarea {
-  font-family: inherit;
-  font-size: 100%;
-}
+from flask import Flask, request, render_template
+import pickle
+import numpy as np
 
-button {
-  width: 150px;
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
-}
- </style>
-</head>
+app = Flask(__name__)
+model = pickle.load(open('random_forest_model.pkl','rb'))
 
-<body>
- <div class="login">
-	<h1>Predict Mobile Phone Price Range</h1>
-<center>
-     <!-- Main Input For Receiving Query to our ML -->
-    <form action="{{ url_for('predict')}}"method="post">
-    	<input type="text" name="battery_power" placeholder="Battery Power" required="required" /><br><br>
-        <input type="text" name="blue" placeholder="Blue?" required="required" /><br><br>
-		<input type="text" name="clock_speed" placeholder="Clock Speed" required="required" /><br><br>
-		<input type="text" name="dual_sim" placeholder="Dual Sim?" required="required" /><br><br>
-        <input type="text" name="fc" placeholder="FC" required="required" /><br><br>
-		<input type="text" name="four_g" placeholder="4G?" required="required" /><br><br>
-		<input type="text" name="int_memory" placeholder="Internal Memory" required="required" /><br><br>
-        <input type="text" name="m_dep" placeholder="M Dep" required="required" /><br><br>
-		<input type="text" name="mobile_wt" placeholder="Mobile Weight" required="required" /><br><br>
-		<input type="text" name="n_cores" placeholder="Number of Cores" required="required" /><br><br>
-		<input type="text" name="pc" placeholder="PC" required="required" /><br><br>
-        <input type="text" name="px_height" placeholder="Px Height" required="required" /><br><br>
-		<input type="text" name="px_width" placeholder="Px Width" required="required" /><br><br>
-		<input type="text" name="ram" placeholder="RAM" required="required" /><br><br>
-        <input type="text" name="sc_h" placeholder="SC H" required="required" /><br><br>
-		<input type="text" name="sc_w" placeholder="SC W" required="required" /><br><br>
-		<input type="text" name="talk_time" placeholder="Talk Time" required="required" /><br><br>
-        <input type="text" name="three_g" placeholder="3G?" required="required" /><br><br>
-		<input type="text" name="touch_screen" placeholder="Touch Screen?" required="required" /><br><br>
-		<input type="text" name="wifi" placeholder="Wifi Support?" required="required" /><br><br>
-        
-        <button type="submit" class="btn btn-primary btn-block btn-large">Predict</button>
-    </form>
-</center>
-   <br>
-   <br>
-   {{ prediction_text }}
+@app.route('/')
+def home():
+    return render_template('templates/index.html')
 
- </div>
+@app.route('/predict', methods =['POST'])
+def predict():
+    """
+    For rendering results on HTML GUI
+    -------
+    None.
+    """
+    int_features =[int(x) for x in request.form.values()]
+    final_features = [np.array(int_features)]
+    prediction = model.predict(final_features)
+    output = round(prediction[0], 2)
+    return render_template('index.html', prediction_text = 'Price range should be {}'.format(output))
 
-
-</body>
-</html>
+if __name__ == "__main__":
+    app.run(debug = True)
